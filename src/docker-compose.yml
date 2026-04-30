@@ -1,0 +1,65 @@
+﻿services:
+  api:
+    image: journal/api:latest
+    container_name: api
+    build: 
+      context: .
+      dockerfile : Dockerfile
+    depends_on:
+      maria-db:
+        condition : service_healthy
+      rabbit-mq:
+        condition : service_healthy
+      seq:
+        condition : service_started
+      redis-stack:
+        condition : service_started
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ConnectionString=Server=maria-db;Port=3306;Database=journal;Uid=root;Pwd=my-secret-pw
+      - RabbitMQ=amqp://guest:guest@rabbit-mq:5672/
+      - Seq=http://seq:5341/
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Redis=redis-stack
+  maria-db:
+    image: mariadb:latest
+    container_name: maria-db
+    ports:
+      - 3306:3306
+    environment:
+      - MARIADB_ROOT_PASSWORD=my-secret-pw
+      - MARIADB_MYSQL_LOCALHOST_USER=1
+      - MARIADB_MYSQL_LOCALHOST_GRANTS=USAGE
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  rabbit-mq:
+    image: rabbitmq:3-management
+    container_name: rabbit-mq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    ports: 
+      - 5341:5341
+      - 80:80
+    environment: 
+      - ACCEPT_EULA=Y
+  redis-stack:
+    container_name: redis-stack
+    image: redis/redis-stack
+    ports:
+      - 6379:6379
+      - 8001:8001
