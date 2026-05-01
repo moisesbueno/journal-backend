@@ -7,12 +7,12 @@ namespace Journal.Application.Journal.Commands.Validations
     {
         public AddJournalCommandValidator()
         {
-            RuleFor(c => c.Title)
+            RuleFor(c => c.Name)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .MaximumLength(200);
 
-            RuleFor(c => c.Content)
+            RuleFor(c => c.Issn)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .MaximumLength(10000);

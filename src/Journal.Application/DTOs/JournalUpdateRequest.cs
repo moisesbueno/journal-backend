@@ -4,6 +4,6 @@ namespace Journal.Application.DTOs
     {
         public string Title { get; set; }
         
-        public string Content { get; set; }
+        public string AimScope { get; set; }
     }
 }

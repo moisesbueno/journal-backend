@@ -29,9 +29,14 @@ namespace Journal.Application.Journal.Commands
                 return Result<JournalEntity>.Failure(errors);
             }
 
+            var currentJournal = await _unitOfWork.JournalRepository.GetByIdAsync(request.Id);
+
             var journalToUpdate = request.ToEntity();
 
-            await _unitOfWork.JournalRepository.UpdateAsync(journalToUpdate);
+            currentJournal.Aimscope = journalToUpdate.Aimscope;
+            currentJournal.Name = journalToUpdate.Name;
+
+            await _unitOfWork.JournalRepository.UpdateAsync(currentJournal);
 
             await _unitOfWork.CommitAsync(cancellationToken);
 

@@ -28,28 +28,16 @@ public class JournalController : Controller
     {
         var command = new AddJournalCommand
         {
-            Title = journalRequest.Name,
-            //Content = journalRequest.
-            //Content = journalRequest.Content,
+            Name = journalRequest.Name,
+            Issn = journalRequest.Issn,
         };
 
         var result = await _mediator.Send(command);
 
-        // if (result.IsSuccess)
-        // {
-        //     var journalMessage = new JournalMessage
-        //     {
-        //         Id = result.Value.Id,
-        //         Title = result.Value.Title,
-        //         Content = result.Value.Content,
-        //         CreatedAt = result.Value.CreatedAt,
-        //         UserId = result.Value.UserId
-        //     };
-
-        //     await _journalPublisher.SendMessageAsync(journalMessage, QueuesName.JournalQueue);
-
-        //     return Ok(journalMessage.Id);
-        // }
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
 
         return BadRequest(result.Errors);
     }
@@ -61,27 +49,16 @@ public class JournalController : Controller
         {
             Id = id,
             Name = journalRequest.Title,
-            Aimscope = journalRequest.Content
+            Aimscope = journalRequest.AimScope
         };
 
         var result = await _mediator.Send(command);
 
-        // if (result.IsSuccess)
-        // {
-        //     var journalMessage = new JournalMessage
-        //     {
-        //         Id = result.Value.Id,
-        //         Title = result.Value.Title,
-        //         Content = result.Value.Content,
-        //         CreatedAt = result.Value.CreatedAt,
-        //         UserId = result.Value.UserId
-        //     };
-
-        //     await _journalPublisher.SendMessageAsync(journalMessage, QueuesName.JournalQueue);
-
-        //     return Ok(journalMessage.Id);
-        // }
-
+        if (result.IsSuccess)
+        {
+            return BadRequest(result.Errors);
+        }
+    
         return Ok(result);
     }
 
