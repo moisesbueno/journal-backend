@@ -17,9 +17,9 @@ namespace Journal.Application.Journal.Queries
 
         public async Task<PaginatedList<JournalEntity>> Handle(GetJournalsQuery request, CancellationToken cancellationToken)
         {
-            var total = await _journalRepository.CountAsync(request.Search);
+            var total = await _journalRepository.CountAsync(request.Search ?? "");
 
-            var result = await _journalRepository.GetAsync(request.Search, request.PageNumber, request.PageSize);
+            var result = await _journalRepository.GetAsync(request.Search ?? "", request.PageNumber, request.PageSize);
 
             return new PaginatedList<JournalEntity>(result.ToList(), request.PageSize, request.PageNumber, total);
         }

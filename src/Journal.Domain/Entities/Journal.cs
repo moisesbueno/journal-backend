@@ -22,6 +22,12 @@ public partial class Journal : Entity
 
     public Journal()
     {
-        
+        Issn = string.Empty;
+        Name = string.Empty;
+        Qualisid = null;
+        Aimscope = string.Empty;
+        Formatid = null;
+        Apc = null;
+        Url = string.Empty;
     }
 }

@@ -19,7 +19,7 @@ public class Program
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
-            .WriteTo.Seq(builder.Configuration.GetSection("Seq").Value)
+            //.WriteTo.Seq(builder.Configuration.GetSection("Seq").Value)
             .WriteTo.MySQL(builder.Configuration.GetSection("ConnectionString").Value)
             .CreateLogger();
 
