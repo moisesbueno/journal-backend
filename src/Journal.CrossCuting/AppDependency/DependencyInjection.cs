@@ -5,6 +5,7 @@ using Journal.Infrastructure.MessageBus;
 using Journal.Infrastructure.Persistence;
 using Journal.Infrastructure.Persistence.Context;
 using Journal.Infrastructure.Persistence.Repositories;
+using Journal.Infrastructure.Persistence.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ namespace Journal.CrossCuting.AppDependency
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IJournalRepository,JournalRepository>();
+            services.AddHealthChecks().AddCheck<MysqlDbHealthCheckService>("MySQL DB");
             services.AddDbContext<JournalContext>(options =>
             {
                 var connectionString = configuration.GetSection("ConnectionString").Value;

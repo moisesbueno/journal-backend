@@ -1,10 +1,11 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Journal.Api.Consumers;
+using HealthChecks.UI.Client;
 using Journal.Api.Jobs;
 using Journal.CrossCuting.AppDependency;
 using Journal.Domain.Abstractions;
 using Journal.Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Quartz;
 using Serilog;
 using StackExchange.Redis;
@@ -27,8 +28,7 @@ public class Program
 
         DependencyInjection.ConfigureDatabase(builder.Configuration);
 
-        // Add services to the container.
-
+                        
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -60,6 +60,13 @@ public class Program
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
         var app = builder.Build();
+
+        app.MapHealthChecks(
+            "/health",
+            new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
