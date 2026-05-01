@@ -18,17 +18,14 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            //.WriteTo.Seq(builder.Configuration.GetSection("Seq").Value)
-            .WriteTo.MySQL(builder.Configuration.GetSection("ConnectionString").Value)
-            .CreateLogger();
+        var configuration = builder.Configuration;
 
-        builder.Services.AddSerilog();
+        builder.Services.AddCustomLog(configuration);
 
-        DependencyInjection.ConfigureDatabase(builder.Configuration);
 
-                        
+        DependencyInjection.ConfigureDatabase(configuration);
+
+
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

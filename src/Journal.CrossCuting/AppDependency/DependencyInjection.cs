@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Reflection;
 
 namespace Journal.CrossCuting.AppDependency
@@ -36,6 +37,27 @@ namespace Journal.CrossCuting.AppDependency
             services.AddMediatR(config => config.RegisterServicesFromAssemblies(Assembly.Load("Journal.Application")));
             services.AddValidatorsFromAssembly(Assembly.Load("Journal.Application"));
           
+            return services;
+        }
+
+        public static IServiceCollection AddCustomLog(this IServiceCollection services,IConfiguration configuration)
+        {
+            var loggerConfiguration = new LoggerConfiguration()
+                            .WriteTo.Console();
+
+            var seqUrl = configuration.GetSection("Seq").Value;
+
+            if (!string.IsNullOrEmpty(seqUrl))
+            {
+                loggerConfiguration = loggerConfiguration.WriteTo.Seq(seqUrl);
+            }
+
+            loggerConfiguration = loggerConfiguration.WriteTo.MySQL(configuration.GetSection("ConnectionString").Value);
+
+            Log.Logger = loggerConfiguration.CreateLogger();
+
+            services.AddSerilog(Log.Logger, true);
+
             return services;
         }
 
