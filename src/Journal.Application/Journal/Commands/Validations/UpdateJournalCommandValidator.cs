@@ -8,12 +8,12 @@ namespace Journal.Application.Journal.Commands.Validations
     {
         public UpdateJournalCommandValidator()
         {
-            RuleFor(c => c.Title)
+            RuleFor(c => c.Name)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .MaximumLength(200);
 
-            RuleFor(c => c.Content)
+            RuleFor(c => c.Aimscope)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .MaximumLength(10000);

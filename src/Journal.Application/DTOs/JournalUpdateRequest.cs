@@ -1,13 +1,9 @@
-namespace Journal.Api.Models
+namespace Journal.Application.DTOs
 {
     public class JournalUpdateRequest
     {
         public string Title { get; set; }
         
         public string Content { get; set; }
-        
-        public DateTime CreatedAt { get; set; }
-        
-        public Guid UserId { get; set; }
     }
 }

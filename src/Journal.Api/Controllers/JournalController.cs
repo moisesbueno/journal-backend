@@ -1,16 +1,10 @@
-﻿using Journal.Api.Models;
-using Journal.Api.Validators;
-using Journal.Application.DTOs;
+﻿using Journal.Application.DTOs;
 using Journal.Application.Journal.Queries;
 using Journal.Application.Journal.Commands;
-using Journal.Domain.Abstractions;
 using Journal.Infrastructure.MessageBus;
 using Journal.Infrastructure.MessageBus.Queues;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using StackExchange.Redis;
 using MediatR;
-using FluentValidation;
 
 namespace Journal.Api.Controllers;
 
@@ -18,23 +12,14 @@ namespace Journal.Api.Controllers;
 [Route("api/journal")]
 public class JournalController : Controller
 {
-    private readonly IConnectionMultiplexer _connectionMultiplexer;
     private readonly IPublisher<JournalMessage> _journalPublisher;
-    private readonly IJournalRepository _journalRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IMediator _mediator;
 
     public JournalController(
-        IUnitOfWork unitOfWork,
-        IJournalRepository journalRepository,
         IPublisher<JournalMessage> journalPublisher,
-        IConnectionMultiplexer connectionMultiplexer,
         IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
-        _journalRepository = journalRepository;
         _journalPublisher = journalPublisher;
-        _connectionMultiplexer = connectionMultiplexer;
         _mediator = mediator;
     }
 
@@ -44,6 +29,7 @@ public class JournalController : Controller
         var command = new AddJournalCommand
         {
             Title = journalRequest.Name,
+            //Content = journalRequest.
             //Content = journalRequest.Content,
         };
 
@@ -71,22 +57,11 @@ public class JournalController : Controller
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] JournalUpdateRequest journalRequest)
     {
-        // Validate the request
-        var validator = new JournalUpdateRequestValidator();
-        var validationResult = validator.Validate(journalRequest);
-        
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
         var command = new UpdateJournalCommand
         {
             Id = id,
-            Title = journalRequest.Title,
-            Content = journalRequest.Content,
-            CreatedAt = journalRequest.CreatedAt,
-            UserId = journalRequest.UserId
+            Name = journalRequest.Title,
+            Aimscope = journalRequest.Content
         };
 
         var result = await _mediator.Send(command);

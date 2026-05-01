@@ -69,9 +69,9 @@ namespace Journal.Infrastructure.Persistence.Repositories
 
         }
 
-        public Task UpdateAsync(Domain.Entities.Journal journal)
+        public async Task UpdateAsync(Domain.Entities.Journal journal)
         {
-            throw new NotImplementedException();
+            _journalContext.Journals.Update(journal);
         }
     }
 }

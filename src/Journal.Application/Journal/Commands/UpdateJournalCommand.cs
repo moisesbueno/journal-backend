@@ -10,26 +10,13 @@ namespace Journal.Application.Journal.Commands
     {
         public Guid Id { get; set; }
         
-        public string Title { get; set; }
+        public string Name { get; set; }
         
-        public string Content { get; set; }
+        public string Aimscope { get; set; }
         
-        public DateTime CreatedAt { get; set; }
-        
-        public Guid UserId { get; set; }
-
         public JournalEntity ToEntity()
         {
-            return new JournalEntity
-            {
-                Name = Title,
-                Issn = string.Empty,
-                Qualisid = null,
-                Aimscope = Content,
-                Formatid = null,
-                Apc = null,
-                Url = string.Empty
-            };
+            return new JournalEntity(Id,Name,Aimscope);
         }
     }
 }
