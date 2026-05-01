@@ -1,14 +1,8 @@
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
 using Journal.Api.Jobs;
 using Journal.CrossCuting.AppDependency;
-using Journal.Domain.Abstractions;
-using Journal.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Quartz;
-using Serilog;
-using StackExchange.Redis;
 
 namespace Journal.Api;
 
@@ -22,25 +16,15 @@ public class Program
 
         builder.Services.AddCustomLog(configuration);
 
-
         DependencyInjection.ConfigureDatabase(configuration);
-
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddFluentValidationAutoValidation()
-            .AddValidatorsFromAssembly(typeof(Program).Assembly);
-
         builder.Services.AddInfra(builder.Configuration);
 
-        builder.Services.AddTransient<IJournalRepository, JournalRepository>();
-        builder.Services.AddTransient<IQualisRepository, QualisRepository>();
-        builder.Services.AddTransient<IUserRepository, UserRepository>();
         //builder.Services.AddHostedService<JournalConsumer>();
-        builder.Services.AddSingleton<IConnectionMultiplexer>(
-            ConnectionMultiplexer.Connect(builder.Configuration.GetSection("Redis").Value));
 
         builder.Services.AddQuartz(q =>
         {

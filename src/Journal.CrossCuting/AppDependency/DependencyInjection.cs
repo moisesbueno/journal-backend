@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using StackExchange.Redis;
 using System.Reflection;
 
 namespace Journal.CrossCuting.AppDependency
@@ -23,7 +24,10 @@ namespace Journal.CrossCuting.AppDependency
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IJournalRepository,JournalRepository>();
+            services.AddTransient<IJournalRepository, JournalRepository>();
+            services.AddTransient<IQualisRepository, QualisRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IJournalRepository, JournalRepository>();
             services.AddHealthChecks().AddCheck<MysqlDbHealthCheckService>("MySQL DB");
             services.AddDbContext<JournalContext>(options =>
             {
@@ -36,11 +40,12 @@ namespace Journal.CrossCuting.AppDependency
             services.AddSingleton(typeof(IPublisher<>), typeof(Publisher<>));
             services.AddMediatR(config => config.RegisterServicesFromAssemblies(Assembly.Load("Journal.Application")));
             services.AddValidatorsFromAssembly(Assembly.Load("Journal.Application"));
-          
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(configuration.GetSection("Redis").Value));
+
             return services;
         }
 
-        public static IServiceCollection AddCustomLog(this IServiceCollection services,IConfiguration configuration)
+        public static IServiceCollection AddCustomLog(this IServiceCollection services, IConfiguration configuration)
         {
             var loggerConfiguration = new LoggerConfiguration()
                             .WriteTo.Console();
