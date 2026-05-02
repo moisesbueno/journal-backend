@@ -26,4 +26,9 @@ namespace Journal.Application.User.Commands.Validations
                });
         }
     }
+
+    public class LoginUserCommandValidator: AbstractValidator<LoginUserCommand>
+    {
+        
+    }
 }

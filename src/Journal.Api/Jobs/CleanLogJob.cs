@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Journal.Infrastructure.Persistence;
+using MediatR;
 using Quartz;
 
 namespace Journal.Api.Jobs
@@ -8,21 +9,20 @@ namespace Journal.Api.Jobs
     {
         private readonly DbServerData _dataSource;
         private readonly ILogger<CleanLogJob> _logger;
+        private readonly IMediator _mediator;
 
-        public CleanLogJob(DbServerData dataSource, ILogger<CleanLogJob> logger)
+        public CleanLogJob(IMediator mediator)
         {
-            _dataSource = dataSource;
-            _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            using var connection = await _dataSource.OpenConnectionAsync();
-
-            var result = await connection.ExecuteAsync("DElETE FROM Logs WHERE Timestamp <= @Timestamp",
-                                                       new { Timestamp = DateTime.UtcNow.AddDays(-7) });
-
-            _logger.LogInformation("Clean log table with result {result}", result);
+            var cleanLogCommand = new CleanLogCommand()
+            {
+                Timestamp = DateTime.UtcNow.AddDays(-7)
+            };
+            await _mediator.Send(cleanLogCommand);
         }
     }
 }

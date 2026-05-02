@@ -4,6 +4,8 @@
     {
         IUserRepository UserRepository { get; }
 
+        IJournalRepository JournalRepository { get; }
+
         Task<int> CommitAsync(CancellationToken cancellationToken = default);
     }
 }

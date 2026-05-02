@@ -20,8 +20,12 @@ public partial class Journal : Entity
 
     public virtual Qualis Qualis { get; set; }
 
-    public Journal()
+    public Journal(){}
+
+    public Journal(Guid id,string name, string aimScope)
     {
-        
+        Id = id;
+        Name = name;
+        Aimscope = aimScope;
     }
 }

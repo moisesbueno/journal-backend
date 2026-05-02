@@ -1,11 +1,10 @@
-﻿using Journal.Api.Models;
-using Journal.Application.DTOs;
-using Journal.Domain.Abstractions;
+﻿using Journal.Application.DTOs;
+using Journal.Application.Journal.Queries;
+using Journal.Application.Journal.Commands;
 using Journal.Infrastructure.MessageBus;
 using Journal.Infrastructure.MessageBus.Queues;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using StackExchange.Redis;
+using MediatR;
 
 namespace Journal.Api.Controllers;
 
@@ -13,70 +12,101 @@ namespace Journal.Api.Controllers;
 [Route("api/journal")]
 public class JournalController : Controller
 {
-    private readonly IConnectionMultiplexer _connectionMultiplexer;
     private readonly IPublisher<JournalMessage> _journalPublisher;
-    private readonly IJournalRepository _journalRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
     public JournalController(
-        IUnitOfWork unitOfWork,
-        IJournalRepository journalRepository,
         IPublisher<JournalMessage> journalPublisher,
-        IConnectionMultiplexer connectionMultiplexer)
+        IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
-        _journalRepository = journalRepository;
         _journalPublisher = journalPublisher;
-        _connectionMultiplexer = connectionMultiplexer;
+        _mediator = mediator;
     }
 
     [HttpPost("")]
     public async Task<IActionResult> Add([FromBody] JournalAddRequest journalRequest)
     {
-        var journalMessage = journalRequest.ToModel();
+        var command = new AddJournalCommand
+        {
+            Name = journalRequest.Name,
+            Issn = journalRequest.Issn,
+        };
 
-        await _journalPublisher.SendMessageAsync(journalMessage, QueuesName.JournalQueue);
+        var result = await _mediator.Send(command);
 
-        return Ok(journalMessage.Id);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
+
+        return BadRequest(result.Errors);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update([FromBody] JournalAddRequest journalRequest)
+    public async Task<IActionResult> Update(Guid id, [FromBody] JournalUpdateRequest journalRequest)
     {
-        throw new NotImplementedException();
+        var command = new UpdateJournalCommand
+        {
+            Id = id,
+            Name = journalRequest.Title,
+            Aimscope = journalRequest.AimScope
+        };
+
+        var result = await _mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            return BadRequest(result.Errors);
+        }
+    
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var redisDb = _connectionMultiplexer.GetDatabase();
-
-        var keyName = $"{nameof(JournalResponse)}-{id}";
-
-        string response = await redisDb.StringGetAsync(keyName);
-
-        if (string.IsNullOrEmpty(response))
+        var query = new GetByIdQuery
         {
-            var result = await _journalRepository.GetByIdAsync(id);
+            Id = id
+        };
 
-            if (result is not null)
-            {
-                response = JsonConvert.SerializeObject(result);
-            }
+        var result = await _mediator.Send(query);
 
-            await redisDb.StringSetAsync(keyName, response, TimeSpan.FromMinutes(1));
-        }
+        if (result is null)
+            return NotFound();
 
-        return Ok(response);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Remove(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var result = await _journalRepository.RemoveAsync(id);
+        var command = new DeleteJournalCommand
+        {
+            Id = id
+        };
 
-        if (!result) return NotFound();
-        await _unitOfWork.CommitAsync();
-        return Ok();
+        var result = await _mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            return Ok();
+        }
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpGet("")]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var query = new GetJournalsQuery
+        {
+            PageNumber = page,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Journal.Application.DTOs
+﻿using Journal.Application.Utils;
+
+namespace Journal.Application.DTOs
 {
     public class ErrorResponse
     {
