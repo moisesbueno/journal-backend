@@ -1,5 +1,7 @@
 ﻿using DbUp;
 using FluentValidation;
+using Journal.Application.User.Commands;
+using Journal.Application.User.Commands.Validations;
 using Journal.Domain.Abstractions;
 using Journal.Infrastructure.MessageBus;
 using Journal.Infrastructure.Persistence;
@@ -28,6 +30,7 @@ namespace Journal.CrossCuting.AppDependency
             services.AddTransient<IQualisRepository, QualisRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IJournalRepository, JournalRepository>();
+            services.AddTransient<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddHealthChecks().AddCheck<MysqlDbHealthCheckService>("MySQL DB");
             services.AddDbContext<JournalContext>(options =>
             {
