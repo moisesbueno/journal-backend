@@ -9,8 +9,8 @@ ASP.NET Core 8 API for journal/qualis data. Run everything from the repo root un
   - The README's `cd src && dotnet run` does **not** work — there is no csproj in `src/`.
 - No test project exists. `dotnet test` covers nothing; verify by building and calling endpoints (Swagger or `curl`).
 - Local dependencies: MariaDB/MySQL is mandatory; Seq and RabbitMQ are optional.
-  `cd src && docker compose up -d maria-db seq`
-  `docker compose build api` is currently broken: `src/Dockerfile` still copies `Journal.Data/` and `Journal.MessageBus/` csproj files that no longer exist. Run `maria-db` + `seq` from compose and the API with `dotnet run`.
+  `cd src && podman compose up -d maria-db seq`
+  `podman compose build api` builds the API image from `src/Dockerfile` (compose file: `src/compose.yaml`). On macOS start the Podman VM first: `podman machine start`.
 
 ## Configuration
 

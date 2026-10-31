@@ -4,6 +4,7 @@ ASP.NET Core 8 API for journal/qualis data.
 
 ## Requirements
 - .NET 8.0 SDK
+- Podman with `podman compose` (on macOS run `podman machine init && podman machine start` once)
 - MariaDB or MySQL — **required** (DbUp migrations run at startup; the API won't start without a database)
 - Redis — optional (enables the distributed cache; falls back to in-memory)
 - Seq — optional (structured logs)
@@ -13,22 +14,22 @@ ASP.NET Core 8 API for journal/qualis data.
 
 1. Start the database:
    ```bash
-   docker run -d --name some-mariadb -p 3306:3306 -e MARIADB_ROOT_PASSWORD=my-secret-pw mariadb:latest
+   podman run -d --name some-mariadb -p 3306:3306 -e MARIADB_ROOT_PASSWORD=my-secret-pw mariadb:latest
    ```
    Or use compose for the database, Seq and Redis:
    ```bash
-   cd src && docker compose up -d maria-db seq redis-stack
+   cd src && podman compose up -d maria-db seq redis-stack
    ```
 
 2. (Optional) Run Redis:
    ```bash
-   docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
+   podman run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
    ```
 
 3. Configure `src/Journal.Api/appsettings.Development.json` — see the example below.
    The committed file points at `note-samsung.local`; change it to `localhost`.
 
-4. Set the JWT signing key (it is not committed and login fails without it):
+4. Set the JWT signing key (it is not committed and the API will not start without it):
    ```bash
    cd src/Journal.Api
    dotnet user-secrets set "Jwt:Key" "<32+ char secret>"
@@ -66,7 +67,7 @@ ASP.NET Core 8 API for journal/qualis data.
 | Key | Required | Environment variable | Notes |
 | --- | --- | --- | --- |
 | `ConnectionString` | yes | `ConnectionString` | MariaDB/MySQL connection string |
-| `Jwt:Key` | yes | `Jwt__Key` | 32+ char signing secret; use user-secrets |
+| `Jwt:Key` | yes | `Jwt__Key` | 32+ char signing secret; the API fails fast if missing |
 | `Redis` | no | `Redis` | Empty = in-memory distributed cache |
 | `Seq` | no | `Seq` | Empty = no Seq sink |
 | `RabbitMQ` | no | `RabbitMQ` | Empty = no message bus connection |
@@ -77,10 +78,18 @@ ASP.NET Core 8 API for journal/qualis data.
 - `GET /health` — health checks (MySQL)
 - `GET /swagger` — OpenAPI UI
 
+Journal routes (`/api/journal/*`) require authentication. Send the login token in the header:
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:5288/api/journal
+```
+
+Requests without a valid token return `401`. Swagger exposes an **Authorize** button for the same purpose.
+
 ## Notes
 - Schema changes are DbUp scripts in `src/Journal.Infrastructure/Persistence/Scripts`; do not use `dotnet ef migrations`.
 - The API fails fast at startup if MySQL is unreachable.
-- `docker compose build api` is currently broken (`src/Dockerfile` references removed projects); run the API with `dotnet run`.
+- `podman compose build api` builds the API image from `src/Dockerfile` (compose file: `src/compose.yaml`); `podman compose up -d` starts the whole stack, with the Seq UI at http://localhost:8088.
 - There is no test project — verify changes with `dotnet build src/Journal.sln` and by calling the endpoints.
 
 ## Features Implemented

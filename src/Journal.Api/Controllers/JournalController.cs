@@ -3,12 +3,14 @@ using Journal.Application.Journal.Queries;
 using Journal.Application.Journal.Commands;
 using Journal.Infrastructure.MessageBus;
 using Journal.Infrastructure.MessageBus.Queues;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 
 namespace Journal.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/journal")]
 public class JournalController : Controller
 {

@@ -23,6 +23,7 @@
       - Seq=http://seq:5341/
       - ASPNETCORE_ENVIRONMENT=Development
       - Redis=redis-stack
+      - Jwt__Key=${Jwt__Key:-dev-only-secret-change-me-0123456789abcdef}
   maria-db:
     image: mariadb:latest
     container_name: maria-db
@@ -54,7 +55,7 @@
     container_name: seq
     ports: 
       - 5341:5341
-      - 80:80
+      - 8088:80
     environment: 
       - ACCEPT_EULA=Y
   redis-stack:
