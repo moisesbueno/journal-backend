@@ -1,9 +1,6 @@
-﻿using FluentValidation;
-using Journal.Application.DTOs;
-using Journal.Application.User.Commands;
+﻿using Journal.Application.User.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Journal.Api.Controllers
 {
