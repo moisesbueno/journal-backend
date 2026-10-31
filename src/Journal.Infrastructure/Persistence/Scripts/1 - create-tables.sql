@@ -85,10 +85,11 @@ CREATE TABLE journal_indexation
 
 CREATE TABLE user
 (
-	Id CHAR(36) NOT NULL,
+	  Id CHAR(36) NOT NULL,
     Email varchar(80) NOT NULL,
     Password varchar(80) NOT NULL,
     CreatedAt DateTime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt DateTime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    primary key (Id)
+    primary key (Id),
+    CONSTRAINT UniqueUserEmail UNIQUE (Email)
 );

@@ -27,7 +27,7 @@ namespace Journal.Infrastructure.Persistence.Repositories
 
         public async Task<User> GetByEmailAsync(string email)
         {
-            return await _journalContext.Users.FirstAsync(c => c.Email == email);
+            return await _journalContext.Users.FirstOrDefaultAsync(c => c.Email == email);
         }
 
         public async Task<User> GetByIdUserIdAsync(Guid userId)

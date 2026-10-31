@@ -34,7 +34,7 @@ namespace Journal.Application.User.Commands
                 return Result<JwtTokenDto>.Failure(errors);
             }
 
-            var user = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email);
+            var user = await _unitOfWork.UserRepository.GetByEmailAsync(EmailHasher.Hash(request.Email));
 
             if (user is null)
             {
@@ -46,7 +46,7 @@ namespace Journal.Application.User.Commands
                 return Result<JwtTokenDto>.Failure(new List<ErrorResponse> { new ErrorResponse { Message = "Invalid email or password" } });
             }
 
-            var token = _jwtTokenGenerator.GenerateToken(user);
+            var token = _jwtTokenGenerator.GenerateToken(user.Id, request.Email);
 
             return Result<JwtTokenDto>.Success(new JwtTokenDto { Token = token });
         }

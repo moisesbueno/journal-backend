@@ -1,11 +1,12 @@
-﻿using Journal.Application.Utils;
+﻿using Journal.Application.DTOs;
+using Journal.Application.Utils;
 using MediatR;
 
 using UserEntity = Journal.Domain.Entities.User;
 
 namespace Journal.Application.User.Commands
 {
-    public sealed class CreateUserCommand : IRequest<Result<UserEntity>>
+    public sealed class CreateUserCommand : IRequest<Result<UserCreatedDto>>
     {
         public string Email { get; set; }
 
@@ -15,7 +16,7 @@ namespace Journal.Application.User.Commands
 
         public UserEntity ToEntity()
         {
-            return new UserEntity(Email, PasswordHasher.HashPassword(Password));
+            return new UserEntity(EmailHasher.Hash(Email), PasswordHasher.HashPassword(Password));
         }
     }
 }
