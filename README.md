@@ -4,6 +4,7 @@ ASP.NET Core 8 API for journal/qualis data.
 
 ## Requirements
 - .NET 8.0 SDK
+- Podman with `podman compose` (on macOS run `podman machine init && podman machine start` once)
 - MariaDB or MySQL — **required** (DbUp migrations run at startup; the API won't start without a database)
 - Redis — optional (enables the distributed cache; falls back to in-memory)
 - Seq — optional (structured logs)
@@ -13,16 +14,16 @@ ASP.NET Core 8 API for journal/qualis data.
 
 1. Start the database:
    ```bash
-   docker run -d --name some-mariadb -p 3306:3306 -e MARIADB_ROOT_PASSWORD=my-secret-pw mariadb:latest
+   podman run -d --name some-mariadb -p 3306:3306 -e MARIADB_ROOT_PASSWORD=my-secret-pw mariadb:latest
    ```
    Or use compose for the database, Seq and Redis:
    ```bash
-   cd src && docker compose up -d maria-db seq redis-stack
+   cd src && podman compose up -d maria-db seq redis-stack
    ```
 
 2. (Optional) Run Redis:
    ```bash
-   docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
+   podman run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
    ```
 
 3. Configure `src/Journal.Api/appsettings.Development.json` — see the example below.
@@ -88,7 +89,7 @@ Requests without a valid token return `401`. Swagger exposes an **Authorize** bu
 ## Notes
 - Schema changes are DbUp scripts in `src/Journal.Infrastructure/Persistence/Scripts`; do not use `dotnet ef migrations`.
 - The API fails fast at startup if MySQL is unreachable.
-- `docker compose build api` is currently broken (`src/Dockerfile` references removed projects); run the API with `dotnet run`.
+- `podman compose build api` builds the API image from `src/Dockerfile` (compose file: `src/compose.yaml`); `podman compose up -d` starts the whole stack, with the Seq UI at http://localhost:8088.
 - There is no test project — verify changes with `dotnet build src/Journal.sln` and by calling the endpoints.
 
 ## Features Implemented
