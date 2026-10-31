@@ -25,7 +25,7 @@
       - Redis=redis-stack
       - Jwt__Key=${Jwt__Key:-dev-only-secret-change-me-0123456789abcdef}
   maria-db:
-    image: mariadb:latest
+    image: docker.io/library/mariadb:latest
     container_name: maria-db
     ports:
       - 3306:3306
@@ -40,7 +40,7 @@
       start_period: 30s
       timeout: 10s
   rabbit-mq:
-    image: rabbitmq:3-management
+    image: docker.io/library/rabbitmq:3-management
     container_name: rabbit-mq
     ports:
       - 5672:5672
@@ -51,7 +51,7 @@
       timeout: 30s
       retries: 3
   seq:
-    image: datalust/seq:latest
+    image: docker.io/library/datalust/seq:latest
     container_name: seq
     ports: 
       - 5341:5341
