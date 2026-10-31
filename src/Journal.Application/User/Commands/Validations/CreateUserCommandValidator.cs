@@ -1,16 +1,24 @@
 ﻿using FluentValidation;
+using Journal.Application.Utils;
+using Journal.Domain.Abstractions;
 
 namespace Journal.Application.User.Commands.Validations
 {
     public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
     {
-        public CreateUserCommandValidator()
+        private readonly IUnitOfWork _unitOfWork;
+
+        public CreateUserCommandValidator(IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
 
             RuleFor(c => c.Email)
                .Cascade(CascadeMode.Stop)
                .NotEmpty()
-               .EmailAddress();
+               .EmailAddress()
+               .MustAsync(async (email, cancellationToken) =>
+                   await _unitOfWork.UserRepository.GetByEmailAsync(EmailHasher.Hash(email)) is null)
+               .WithMessage("Email already registered");
 
             RuleFor(c => c.Password)
                 .NotNull()

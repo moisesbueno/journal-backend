@@ -3,11 +3,10 @@ using Journal.Application.DTOs;
 using Journal.Application.Utils;
 using Journal.Domain.Abstractions;
 using MediatR;
-using UserModel = Journal.Domain.Entities.User;
 
 namespace Journal.Application.User.Commands
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<UserModel>>
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<UserCreatedDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<CreateUserCommand> _validator;
@@ -18,7 +17,7 @@ namespace Journal.Application.User.Commands
             _validator = validator;
         }
 
-        public async Task<Result<UserModel>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result<UserCreatedDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
@@ -26,7 +25,7 @@ namespace Journal.Application.User.Commands
             {
                 var errors = validationResult.Errors.Select(e => new ErrorResponse { Message = e.ErrorMessage, Property = e.PropertyName }).ToList();
 
-                return Result<UserModel>.Failure(errors);
+                return Result<UserCreatedDto>.Failure(errors);
             }
 
             var newUser = request.ToEntity();
@@ -35,7 +34,7 @@ namespace Journal.Application.User.Commands
 
             await _unitOfWork.CommitAsync(cancellationToken);
 
-            return Result<UserModel>.Success(newUser);
+            return Result<UserCreatedDto>.Success(new UserCreatedDto { Email = request.Email });
         }
     }
 }
