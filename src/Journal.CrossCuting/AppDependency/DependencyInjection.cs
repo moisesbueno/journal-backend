@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using StackExchange.Redis;
 using System.Reflection;
 
 namespace Journal.CrossCuting.AppDependency
@@ -43,7 +42,21 @@ namespace Journal.CrossCuting.AppDependency
             services.AddSingleton(typeof(IPublisher<>), typeof(Publisher<>));
             services.AddMediatR(config => config.RegisterServicesFromAssemblies(Assembly.Load("Journal.Application")));
             services.AddValidatorsFromAssembly(Assembly.Load("Journal.Application"));
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(configuration.GetSection("Redis").Value));
+
+            var redisConnection = configuration.GetSection("Redis").Value;
+
+            if (!string.IsNullOrWhiteSpace(redisConnection))
+            {
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = redisConnection;
+                    options.InstanceName = "journal:";
+                });
+            }
+            else
+            {
+                services.AddDistributedMemoryCache();
+            }
 
             return services;
         }
