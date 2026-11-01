@@ -13,7 +13,7 @@
       seq:
         condition : service_started
       redis-stack:
-        condition : service_started
+        condition : service_healthy
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -22,7 +22,7 @@
       - RabbitMQ=amqp://guest:guest@rabbit-mq:5672/
       - Seq=http://seq:5341/
       - ASPNETCORE_ENVIRONMENT=Development
-      - Redis=redis-stack
+      - Redis=localhost:6379,abortConnect=false
       - Jwt__Key=${Jwt__Key:-dev-only-secret-change-me-0123456789abcdef}
   maria-db:
     image: docker.io/library/mariadb:latest
