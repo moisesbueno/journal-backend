@@ -90,6 +90,7 @@ namespace Journal.CrossCuting.AppDependency
         public static IServiceCollection AddCustomLog(this IServiceCollection services, IConfiguration configuration)
         {
             var loggerConfiguration = new LoggerConfiguration()
+                            .MinimumLevel.Information()
                             .WriteTo.Console();
 
             var seqUrl = configuration.GetSection("Seq").Value;
