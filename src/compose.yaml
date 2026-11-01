@@ -9,11 +9,11 @@
       maria-db:
         condition : service_healthy
       rabbit-mq:
-        condition : service_healthy
+        condition : service_started
       seq:
         condition : service_started
       redis-stack:
-        condition : service_healthy
+        condition : service_started
     ports:
       - "8080:8080"
       - "8081:8081"
