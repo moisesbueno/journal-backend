@@ -13,7 +13,7 @@
       seq:
         condition : service_started
       redis-stack:
-        condition : service_started
+        condition : service_healthy
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -22,7 +22,7 @@
       - RabbitMQ=amqp://guest:guest@rabbit-mq:5672/
       - Seq=http://seq:5341/
       - ASPNETCORE_ENVIRONMENT=Development
-      - Redis=redis-stack
+      - Redis=localhost:6379,abortConnect=false
       - Jwt__Key=${Jwt__Key:-dev-only-secret-change-me-0123456789abcdef}
   maria-db:
     image: docker.io/library/mariadb:latest
@@ -51,16 +51,17 @@
       timeout: 30s
       retries: 3
   seq:
-    image: docker.io/library/datalust/seq:latest
+    image: docker.io/datalust/seq:latest
     container_name: seq
     ports: 
       - 5341:5341
       - 8088:80
     environment: 
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=YourStrongPassword123!
   redis-stack:
     container_name: redis-stack
-    image: redis/redis-stack
+    image: docker.io/redis/redis-stack:latest
     ports:
       - 6379:6379
       - 8001:8001
