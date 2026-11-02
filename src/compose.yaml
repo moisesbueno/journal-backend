@@ -1,15 +1,15 @@
 ﻿services:
   api:
-    image: journal/api:latest
-    container_name: api
+    image: journal
+    container_name: journal-api
     build: 
       context: .
       dockerfile : Dockerfile
     depends_on:
       maria-db:
         condition : service_healthy
-      rabbit-mq:
-        condition : service_started
+      # rabbit-mq:
+      #   condition : service_started
       seq:
         condition : service_started
       redis-stack:
@@ -19,10 +19,10 @@
       - "8081:8081"
     environment:
       - ConnectionString=Server=maria-db;Port=3306;Database=journal;Uid=root;Pwd=my-secret-pw
-      - RabbitMQ=amqp://guest:guest@rabbit-mq:5672/
+#      - RabbitMQ=amqp://guest:guest@rabbit-mq:5672/
       - Seq=http://seq:5341/
       - ASPNETCORE_ENVIRONMENT=Development
-      - Redis=localhost:6379,abortConnect=false
+      - Redis=redis-stack:6379,abortConnect=false
       - Jwt__Key=${Jwt__Key:-dev-only-secret-change-me-0123456789abcdef}
   maria-db:
     image: docker.io/library/mariadb:latest
@@ -39,17 +39,17 @@
       retries: 5
       start_period: 30s
       timeout: 10s
-  rabbit-mq:
-    image: docker.io/library/rabbitmq:3-management
-    container_name: rabbit-mq
-    ports:
-      - 5672:5672
-      - 15672:15672
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+  # rabbit-mq:
+  #   image: docker.io/library/rabbitmq:3-management
+  #   container_name: rabbit-mq
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #   healthcheck:
+  #     test: rabbitmq-diagnostics -q ping
+  #     interval: 30s
+  #     timeout: 30s
+  #     retries: 3
   seq:
     image: docker.io/datalust/seq:latest
     container_name: seq
