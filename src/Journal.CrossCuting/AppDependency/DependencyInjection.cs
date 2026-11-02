@@ -1,5 +1,6 @@
 ﻿using DbUp;
 using FluentValidation;
+using Journal.Application.Journal;
 using Journal.Application.User.Commands;
 using Journal.Application.User.Commands.Validations;
 using Journal.Domain.Abstractions;
@@ -45,6 +46,7 @@ namespace Journal.CrossCuting.AppDependency
             services.AddSingleton(typeof(IPublisher<>), typeof(Publisher<>));
             services.AddMediatR(config => config.RegisterServicesFromAssemblies(Assembly.Load("Journal.Application")));
             services.AddValidatorsFromAssembly(Assembly.Load("Journal.Application"));
+            services.AddScoped<JournalCache>();
 
             var redisConnection = configuration.GetSection("Redis").Value;
 

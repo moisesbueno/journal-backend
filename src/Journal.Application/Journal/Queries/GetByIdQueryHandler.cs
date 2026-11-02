@@ -1,23 +1,37 @@
-using Journal.Application.Utils;
+using Journal.Application.DTOs;
 using Journal.Domain.Abstractions;
 using MediatR;
 
-using JournalEntity = Journal.Domain.Entities.Journal;
-
 namespace Journal.Application.Journal.Queries
 {
-    public class GetByIdQueryHandler : IRequestHandler<GetByIdQuery, JournalEntity?>
+    public class GetByIdQueryHandler : IRequestHandler<GetByIdQuery, JournalDto>
     {
         private readonly IJournalRepository _journalRepository;
+        private readonly JournalCache _journalCache;
 
-        public GetByIdQueryHandler(IJournalRepository journalRepository)
+        public GetByIdQueryHandler(IJournalRepository journalRepository, JournalCache journalCache)
         {
             _journalRepository = journalRepository;
+            _journalCache = journalCache;
         }
 
-        public async Task<JournalEntity?> Handle(GetByIdQuery request, CancellationToken cancellationToken)
+        public async Task<JournalDto> Handle(GetByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _journalRepository.GetByIdAsync(request.Id);
+            var cached = await _journalCache.GetAsync(request.Id, cancellationToken);
+
+            if (cached is not null)
+                return cached;
+
+            var journal = await _journalRepository.GetByIdAsync(request.Id);
+
+            if (journal is null)
+                return null;
+
+            var journalDto = JournalDto.FromEntity(journal);
+
+            await _journalCache.SetAsync(journalDto, cancellationToken);
+
+            return journalDto;
         }
     }
 }
