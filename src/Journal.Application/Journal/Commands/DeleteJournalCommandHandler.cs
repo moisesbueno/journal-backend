@@ -4,7 +4,6 @@ using Journal.Application.Utils;
 using Journal.Domain.Abstractions;
 using MediatR;
 using JournalEntity = Journal.Domain.Entities.Journal;
-using Journal.Application.Utils;
 
 namespace Journal.Application.Journal.Commands
 {
@@ -12,11 +11,13 @@ namespace Journal.Application.Journal.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<DeleteJournalCommand> _validator;
+        private readonly JournalCache _journalCache;
 
-        public DeleteJournalCommandHandler(IUnitOfWork unitOfWork, IValidator<DeleteJournalCommand> validator)
+        public DeleteJournalCommandHandler(IUnitOfWork unitOfWork, IValidator<DeleteJournalCommand> validator, JournalCache journalCache)
         {
             _unitOfWork = unitOfWork;
             _validator = validator;
+            _journalCache = journalCache;
         }
 
         public async Task<Result<bool>> Handle(DeleteJournalCommand request, CancellationToken cancellationToken)
@@ -38,6 +39,8 @@ namespace Journal.Application.Journal.Commands
             }
 
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            await _journalCache.RemoveAsync(request.Id, cancellationToken);
 
             return Result<bool>.Success(true);
         }

@@ -11,11 +11,13 @@ namespace Journal.Application.Journal.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<UpdateJournalCommand> _validator;
+        private readonly JournalCache _journalCache;
 
-        public UpdateJournalCommandHandler(IUnitOfWork unitOfWork, IValidator<UpdateJournalCommand> validator)
+        public UpdateJournalCommandHandler(IUnitOfWork unitOfWork, IValidator<UpdateJournalCommand> validator, JournalCache journalCache)
         {
             _unitOfWork = unitOfWork;
             _validator = validator;
+            _journalCache = journalCache;
         }
 
         public async Task<Result<JournalEntity>> Handle(UpdateJournalCommand request, CancellationToken cancellationToken)
@@ -39,6 +41,8 @@ namespace Journal.Application.Journal.Commands
             await _unitOfWork.JournalRepository.UpdateAsync(currentJournal);
 
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            await _journalCache.RemoveAsync(request.Id, cancellationToken);
 
             return Result<JournalEntity>.Success(journalToUpdate);
         }
